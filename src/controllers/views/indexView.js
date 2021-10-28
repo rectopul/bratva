@@ -39,6 +39,8 @@ module.exports = {
 
             if(!home || !whatsapp) return res.redirect('/dashboard')
 
+            const homepage = home.toJSON()
+
             const carousel = await Carousel.findAll({ include: { association: `image` } })
 
             let translateCarousel = carousel.map((carousel) => carousel.toJSON())
@@ -111,8 +113,8 @@ module.exports = {
                 pageTitle: `Bratva`,
                 categories,
                 banners: translateCarousel,
-                bannerPape: home.toJSON().banner.image || '',
-                home: home.toJSON(),
+                bannerPape: homepage.banner ? homepage.banner.image : '',
+                home: homepage,
                 partials: partialTranslations(language),
                 language: language || ``,
                 whatsapp: whatsapp[0] ? whatsapp[0].toJSON() : '',
