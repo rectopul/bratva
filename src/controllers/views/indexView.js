@@ -111,7 +111,7 @@ module.exports = {
                 pageTitle: `Bratva`,
                 categories,
                 banners: translateCarousel,
-                bannerPape: home.toJSON().banner.image,
+                bannerPape: home.toJSON().banner.image || '',
                 home: home.toJSON(),
                 partials: partialTranslations(language),
                 language: language || ``,
