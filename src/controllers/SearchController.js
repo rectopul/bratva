@@ -23,6 +23,43 @@ const adjustDate = (dateString) => {
 }
 
 module.exports = {
+    async delete(req, res) {
+        try {
+            const { id } = req.params
+
+            console.log(id)
+
+            const authHeader = req.headers.authorization
+
+            if (!authHeader) return res.status(401).send({ error: `Usuário não autorizado` })
+
+            console.log({ token: authHeader })
+
+            const { user_id } = await userByToken(authHeader)
+
+            const search = await Search.findByPk(id)
+
+            if (!search) return res.status(204).send({ error: `Código não existe` })
+
+            await search.destroy()
+
+            return res.json(search)
+        } catch (error) {
+            //Validação de erros
+            if (error.name == `JsonWebTokenError`) return res.status(401).send(error.message)
+
+            if (
+                error.name == `SequelizeValidationError` ||
+                error.name == `SequelizeUniqueConstraintError` ||
+                error.name == `userToken`
+            )
+                return res.status(400).send({ error: error.message })
+
+            console.log(`Erro ao deletar produto: `, error)
+
+            return res.status(500).send({ error: `Erro de servidor` })
+        }
+    },
     async store(req, res) {
         try {
             const { name, surname, email, code, localization } = req.body
@@ -68,7 +105,7 @@ module.exports = {
                     device,
                     address: region || 'não captado',
                     status: 'invalid',
-                    inserted_code: code
+                    inserted_code: code,
                 })
 
                 return res.status(204).send({ error: `Código não existe` })
@@ -101,7 +138,7 @@ module.exports = {
                 device,
                 address: region,
                 status: 'success',
-                inserted_code: code
+                inserted_code: code,
             })
             //code
             const response = await Search.findByPk(insertCode.id, {

@@ -93,6 +93,7 @@ routes.put(`/api/category/:category_id`, CategoryController.edit)
 //Consultas
 routes.post(`/api/search`, SearchController.store)
 routes.get(`/api/search`, SearchController.index)
+routes.delete(`/api/search/:id`, SearchController.delete)
 routes.get(`/api/search/:search_id`, SearchController.show)
 //Páginas
 routes.post(`/api/page`, PageController.store)

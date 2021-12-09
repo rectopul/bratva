@@ -52,7 +52,9 @@ module.exports = {
 
             if (!product) return res.status(400).send({ error: `This product not exist` })
 
-            const { name, code } = req.body
+            let { name, code } = req.body
+
+            if (!name) name = product.name
             //check if code exist
             const codeexist = await Code.findOne({ where: { code } })
 
@@ -74,6 +76,7 @@ module.exports = {
             return res.json(response)
         } catch (error) {
             console.log(error)
+            return res.status(400).send(error)
         }
     },
 }
