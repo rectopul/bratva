@@ -58,6 +58,10 @@ module.exports = {
             //check if code exist
             const codeexist = await Code.findOne({ where: { code } })
 
+            const quantities = await Code.count()
+
+            console.log(quantities)
+
             if (codeexist) return res.status(400).send({ error: `This code already exist` })
 
             const item = await ProductItem.create({

