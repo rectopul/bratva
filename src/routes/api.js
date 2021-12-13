@@ -157,7 +157,7 @@ routes.post('/api/discord', (req, res) => {
     var options = {
         method: 'POST',
         url:
-            'https://discord.com/api/webhooks/919941365381615696/3Q-1XjNh19zUdOiRr81VBoJnQhPOns5JwuzLyDNg1POKGe9JsuQIZBUHC3pyMp0B202n',
+            'https://discord.com/api/webhooks/920075890107498546/jAZp7la2RplgKgejsCramASE52-S0pGy-5RCdzSLV92Ld9rVWuugMz7e1RXdUWF0MLb6',
         headers: {
             'Content-Type': 'application/json',
         },
