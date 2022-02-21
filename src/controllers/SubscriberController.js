@@ -15,7 +15,7 @@ module.exports = {
 
             if (checkMail) return res.status(400).send({ error: `Este e-mail já está cadastrado` })
 
-            await Mailchimp.store({ name: fullname, email })
+            //await Mailchimp.store({ name: fullname, email })
 
             const subscriber = await Subscriber.create({ name, surname, email, status: `subscribed` })
 
