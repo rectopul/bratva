@@ -360,9 +360,18 @@ const partner = (() => {
 })()
 
 //Edit partners
-const btnEditPartn = document.querySelectorAll('.partnerEdit')
+const tablePartners = $('.table-partners#dataTable')
+const tablePartnersInfo = $('.table-partners#dataTable').DataTable()
+
+let btnEditPartn = document.querySelectorAll('.partnerEdit')
 
 if (btnEditPartn) Array.from(btnEditPartn).forEach((btn) => partner.edit(btn, document.querySelector('.partnerForm')))
+tablePartners.on('draw.dt', function () {
+    let btnEditPartn = document.querySelectorAll('.partnerEdit')
+
+    if (btnEditPartn)
+        Array.from(btnEditPartn).forEach((btn) => partner.edit(btn, document.querySelector('.partnerForm')))
+})
 
 const formPartner = document.querySelector('.partnerForm')
 
@@ -386,6 +395,4 @@ $('#modalPartner').on('hidden.bs.modal', function (e) {
     form.dataset.id = ``
 
     elements.map((input) => (input.value = ``))
-
-    console.log(form)
 })

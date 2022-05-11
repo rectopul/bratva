@@ -1960,9 +1960,18 @@ const partner = (() => {
 })()
 
 //Edit partners
-const btnEditPartn = document.querySelectorAll('.partnerEdit')
+const tablePartners = $('.table-partners#dataTable')
+const tablePartnersInfo = $('.table-partners#dataTable').DataTable()
+
+let btnEditPartn = document.querySelectorAll('.partnerEdit')
 
 if (btnEditPartn) Array.from(btnEditPartn).forEach((btn) => partner.edit(btn, document.querySelector('.partnerForm')))
+tablePartners.on('draw.dt', function () {
+    let btnEditPartn = document.querySelectorAll('.partnerEdit')
+
+    if (btnEditPartn)
+        Array.from(btnEditPartn).forEach((btn) => partner.edit(btn, document.querySelector('.partnerForm')))
+})
 
 const formPartner = document.querySelector('.partnerForm')
 
@@ -1986,191 +1995,7 @@ $('#modalPartner').on('hidden.bs.modal', function (e) {
     form.dataset.id = ``
 
     elements.map((input) => (input.value = ``))
-
-    console.log(form)
 })
-
-const profile = (() => {
-    //private functions/var
-    const request = (file) => {
-        return new Promise((resolve, reject) => {
-            const token = document.body.dataset.token
-
-            const reqUrl = `/api/user/image`
-
-            const form = new FormData()
-            form.append('file', file)
-
-            fetch(reqUrl, {
-                method: 'PUT',
-                headers: {
-                    authorization: `Bearer ${token}`,
-                },
-                body: form,
-            })
-                .then((res) => res.json())
-                .then((res) => resolve(res))
-                .catch((error) => reject(error))
-        })
-    }
-
-    const requestProfile = (object) => {
-        return new Promise((resolve, reject) => {
-            const token = document.body.dataset.token
-
-            const { name, email, phone, cell, currentPassword, newPassword, address, about, city } = object
-
-            const reqUrl = `/api/user`
-
-            fetch(reqUrl, {
-                method: 'PUT',
-                headers: {
-                    'content-type': 'application/json',
-                    authorization: `Bearer ${token}`,
-                },
-                body: JSON.stringify({ name, email, phone, cell, currentPassword, newPassword, address, about, city }),
-            })
-                .then((res) => res.json())
-                .then((res) => resolve(res))
-                .catch((error) => reject(error))
-        })
-    }
-
-    const changeState = (input) => {
-        input.addEventListener('change', function (e) {
-            editAvatar(input)
-        })
-    }
-
-    const editAvatar = (input) => {
-        console.log(input.files)
-        return request(input.files[0])
-            .then((res) => {
-                if (res.error) return console.log(res.error)
-
-                document.querySelector('.img-profile').src = res.url
-
-                return (document.querySelector('.profile-avatar').src = res.url)
-            })
-            .catch((err) => console.log(err))
-    }
-
-    const enableForm = (button) => {
-        if (!button) console.log(`Botão não existe`)
-        button.addEventListener('click', (e) => {
-            e.preventDefault()
-
-            const form = document.querySelectorAll('.formEditUser input, .formEditUser textarea')
-
-            const formulario = document.querySelector('.formEditUser')
-
-            if (button.classList.contains('save')) {
-                Array.from(form).forEach((input) => {
-                    input.disabled = true
-                })
-
-                button.innerHTML = `Edit profile`
-
-                if (formulario) getFields(formulario)
-
-                return button.classList.remove('save')
-            } else {
-                Array.from(form).forEach((input) => {
-                    input.disabled = false
-                })
-
-                button.innerHTML = `Salvar alterações`
-
-                return button.classList.add('save')
-            }
-        })
-    }
-
-    //get all fields
-    const validate = (list) => {
-        return new Promise((resolve, reject) => {
-            list.map((item) => {
-                const { input, msg } = item
-
-                console.log()
-
-                if (!input.value || input.value == `Selecione...`) {
-                    input.setCustomValidity(msg)
-
-                    input.reportValidity()
-
-                    return reject(msg)
-                }
-
-                return resolve()
-            })
-        })
-    }
-
-    const getFields = (form) => {
-        if (!form) return console.log(`Formulário não existe`)
-
-        const listElements = Array.from(form.elements)
-
-        const object = {
-            name: form.querySelector('#input-username').value,
-            email: form.querySelector('#input-email').value,
-            currentPassword: form.querySelector('#input-current-password').value,
-            newPassword: form.querySelector('#input-new-password').value,
-            address: form.querySelector('#input-address').value,
-            city: form.querySelector('#input-city').value,
-            phone: form.querySelector('#input-phone').value,
-            cell: form.querySelector('#input-cell').value,
-            about: form.querySelector('#textarea-about').value,
-        }
-
-        return requestProfile(object)
-            .then((res) => {
-                if (res.error)
-                    return Swal.fire({
-                        title: `Erro ao atualizar usuário`,
-                        text: res.error,
-                        icon: 'error',
-                        confirmButtonText: 'Ok',
-                    })
-
-                return Swal.fire({
-                    title: `Perfil atualizado`,
-                    text: `O Usuário ${res.name} foi atualizado com sucesso!`,
-                    icon: 'success',
-                    confirmButtonText: 'Ok',
-                })
-            })
-            .catch((err) =>
-                Swal.fire({
-                    title: `Erro ao atualizar usuário`,
-                    text: err,
-                    icon: 'error',
-                    confirmButtonText: 'Ok',
-                })
-            )
-
-        console.log(object)
-    }
-
-    //requestSaveProfile
-
-    return {
-        //public var/functions
-        edit: changeState,
-        enableEdit: enableForm,
-        save: getFields,
-    }
-})()
-
-const inputEditAvatar = document.querySelector('.inputProfileAvatar')
-
-if (inputEditAvatar) profile.edit(inputEditAvatar)
-
-//btnEditUser
-const btnEditUser = document.querySelector('.btnEditUser')
-
-if (btnEditUser) profile.enableEdit(btnEditUser)
 
 const btnsProduct = document.querySelectorAll('.productDelete')
 
@@ -3402,6 +3227,377 @@ const ImageProduct = document.querySelector('.productImage')
 
 if (ImageProduct) imgProduct.change(ImageProduct)
 
+const profile = (() => {
+    //private functions/var
+    const request = (file) => {
+        return new Promise((resolve, reject) => {
+            const token = document.body.dataset.token
+
+            const reqUrl = `/api/user/image`
+
+            const form = new FormData()
+            form.append('file', file)
+
+            fetch(reqUrl, {
+                method: 'PUT',
+                headers: {
+                    authorization: `Bearer ${token}`,
+                },
+                body: form,
+            })
+                .then((res) => res.json())
+                .then((res) => resolve(res))
+                .catch((error) => reject(error))
+        })
+    }
+
+    const requestProfile = (object) => {
+        return new Promise((resolve, reject) => {
+            const token = document.body.dataset.token
+
+            const { name, email, phone, cell, currentPassword, newPassword, address, about, city } = object
+
+            const reqUrl = `/api/user`
+
+            fetch(reqUrl, {
+                method: 'PUT',
+                headers: {
+                    'content-type': 'application/json',
+                    authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify({ name, email, phone, cell, currentPassword, newPassword, address, about, city }),
+            })
+                .then((res) => res.json())
+                .then((res) => resolve(res))
+                .catch((error) => reject(error))
+        })
+    }
+
+    const changeState = (input) => {
+        input.addEventListener('change', function (e) {
+            editAvatar(input)
+        })
+    }
+
+    const editAvatar = (input) => {
+        console.log(input.files)
+        return request(input.files[0])
+            .then((res) => {
+                if (res.error) return console.log(res.error)
+
+                document.querySelector('.img-profile').src = res.url
+
+                return (document.querySelector('.profile-avatar').src = res.url)
+            })
+            .catch((err) => console.log(err))
+    }
+
+    const enableForm = (button) => {
+        if (!button) console.log(`Botão não existe`)
+        button.addEventListener('click', (e) => {
+            e.preventDefault()
+
+            const form = document.querySelectorAll('.formEditUser input, .formEditUser textarea')
+
+            const formulario = document.querySelector('.formEditUser')
+
+            if (button.classList.contains('save')) {
+                Array.from(form).forEach((input) => {
+                    input.disabled = true
+                })
+
+                button.innerHTML = `Edit profile`
+
+                if (formulario) getFields(formulario)
+
+                return button.classList.remove('save')
+            } else {
+                Array.from(form).forEach((input) => {
+                    input.disabled = false
+                })
+
+                button.innerHTML = `Salvar alterações`
+
+                return button.classList.add('save')
+            }
+        })
+    }
+
+    //get all fields
+    const validate = (list) => {
+        return new Promise((resolve, reject) => {
+            list.map((item) => {
+                const { input, msg } = item
+
+                console.log()
+
+                if (!input.value || input.value == `Selecione...`) {
+                    input.setCustomValidity(msg)
+
+                    input.reportValidity()
+
+                    return reject(msg)
+                }
+
+                return resolve()
+            })
+        })
+    }
+
+    const getFields = (form) => {
+        if (!form) return console.log(`Formulário não existe`)
+
+        const listElements = Array.from(form.elements)
+
+        const object = {
+            name: form.querySelector('#input-username').value,
+            email: form.querySelector('#input-email').value,
+            currentPassword: form.querySelector('#input-current-password').value,
+            newPassword: form.querySelector('#input-new-password').value,
+            address: form.querySelector('#input-address').value,
+            city: form.querySelector('#input-city').value,
+            phone: form.querySelector('#input-phone').value,
+            cell: form.querySelector('#input-cell').value,
+            about: form.querySelector('#textarea-about').value,
+        }
+
+        return requestProfile(object)
+            .then((res) => {
+                if (res.error)
+                    return Swal.fire({
+                        title: `Erro ao atualizar usuário`,
+                        text: res.error,
+                        icon: 'error',
+                        confirmButtonText: 'Ok',
+                    })
+
+                return Swal.fire({
+                    title: `Perfil atualizado`,
+                    text: `O Usuário ${res.name} foi atualizado com sucesso!`,
+                    icon: 'success',
+                    confirmButtonText: 'Ok',
+                })
+            })
+            .catch((err) =>
+                Swal.fire({
+                    title: `Erro ao atualizar usuário`,
+                    text: err,
+                    icon: 'error',
+                    confirmButtonText: 'Ok',
+                })
+            )
+
+        console.log(object)
+    }
+
+    //requestSaveProfile
+
+    return {
+        //public var/functions
+        edit: changeState,
+        enableEdit: enableForm,
+        save: getFields,
+    }
+})()
+
+const inputEditAvatar = document.querySelector('.inputProfileAvatar')
+
+if (inputEditAvatar) profile.edit(inputEditAvatar)
+
+//btnEditUser
+const btnEditUser = document.querySelector('.btnEditUser')
+
+if (btnEditUser) profile.enableEdit(btnEditUser)
+
+const search = (() => {
+    //validate form
+    const validate = (list) => {
+        return new Promise((resolve, reject) => {
+            list.map((item) => {
+                const { input, msg } = item
+
+                if (!input.value) {
+                    input.setCustomValidity(msg)
+
+                    input.reportValidity()
+
+                    return reject(msg)
+                }
+
+                return resolve()
+            })
+        })
+    }
+
+    //private vars/functions
+    const search = (btn) => {
+        btn.addEventListener('click', (e) => {
+            e.preventDefault()
+
+            console.log()
+
+            const inputCode = document.querySelector('input.Code')
+
+            const inputName = document.querySelector('input.name')
+            const inputSurname = document.querySelector('input.surname')
+            const inputMail = document.querySelector('input.mail')
+
+            if (inputName && inputSurname && inputMail) {
+                const objectValidate = [
+                    { input: inputName, msg: `Informe seu nome` },
+                    { input: inputSurname, msg: `Informe seu sobrenome` },
+                    { input: inputMail, msg: `Informe seu e-mail` },
+                ]
+
+                return validate(objectValidate)
+                    .then((res) => {
+                        return request({
+                            code: inputCode.value,
+                            name: inputName.value,
+                            surname: inputSurname.value,
+                            email: inputMail.value,
+                        })
+                            .then((res) => {
+                                const { device, code, ip, city, address } = res
+                                const clientInfo = document.querySelector('.clientInfo')
+
+                                return (clientInfo.innerHTML = `
+                            <p>
+                                <strong>Código: </strong> ${code.code}
+                            </p>
+                            <p>
+                                <strong>Produto: </strong> ${code.product.name}
+                            </p>
+                            <p>
+                                <strong>Item: </strong> ${code.item.name}
+                            </p>
+                            <p>
+                                <strong>Device: </strong> ${device}
+                            </p>
+                            <p>
+                                <strong>Cidade: </strong> ${city}
+                            </p>
+                            <p>
+                                <strong>Estado: </strong> ${address}
+                            </p>
+                            <p>
+                                <strong>Endereço IP: </strong> ${ip}
+                            </p>
+                        `)
+                            })
+                            .catch((err) => {
+                                return Swal.fire({
+                                    title: err,
+                                    icon: 'error',
+                                    confirmButtonText: 'Ok',
+                                })
+                            })
+                    })
+                    .catch((err) => console.log(err))
+            }
+        })
+    }
+
+    const request = (object) => {
+        return new Promise( async (resolve, reject) => {
+            try {
+    
+                const localization = await fetch(`https://ipapi.co/json/`)
+                
+                const { name, surname, email, code } = object
+    
+                fetch(`/api/search`, {
+                    method: 'POST',
+                    headers: {
+                        'content-type': 'application/json',
+                    },
+                    body: JSON.stringify({ name, surname, email, code, ip, city, region, localization }),
+                })
+                    .then((res) => res.json())
+                    .then((res) => {
+                        if (res.error) return reject(res.error)
+                        return resolve(res)
+                    })
+                    .catch(reject)
+
+            } catch (error) {
+                console.log(error);
+                reject(error)
+            }
+        })
+    }
+
+    const requestShow = (id) => {
+        return new Promise((resolve, reject) => {
+            const token = document.body.dataset.token
+
+            fetch(`/api/search/${id}`, {
+                method: 'GET',
+                headers: {
+                    'content-type': 'application/json',
+                    authorization: `Bearer ${token}`,
+                },
+            })
+                .then((res) => res.json())
+                .then((res) => {
+                    if (res.error) return reject(res.error)
+                    return resolve(res)
+                })
+                .catch((error) => reject(error))
+        })
+    }
+
+    const show = (searche) => {
+        //modalShowConsult
+        searche.addEventListener('click', (e) => {
+            e.preventDefault()
+
+            const id = searche.dataset.id
+
+            return requestShow(id).then((res) => {
+                const date = new Intl.DateTimeFormat('pt-BR').format(new Date(res.createdAt))
+                document.querySelector('.consultId').innerHTML = res.id
+                document.querySelector('.consultName').innerHTML = res.name
+                document.querySelector('.consultSurname').innerHTML = res.surname
+                document.querySelector('.consultMail').innerHTML = res.email
+                document.querySelector('.consultCity').innerHTML = res.city
+                document.querySelector('.consultAddress').innerHTML = res.address
+                document.querySelector('.consultCode').innerHTML = res.code ? res.code.code : res.inserted_code + ' (código inválido)'
+                document.querySelector('.consultIp').innerHTML = res.ip
+                document.querySelector('.constData').innerHTML = date
+                $('#modalShowConsult').modal('show')
+            })
+        })
+    }
+    return {
+        //piblic vars/function
+        search,
+        show,
+    }
+})()
+
+const consults = document.querySelectorAll('.listConsults > tr')
+
+if (consults) {
+    Array.from(consults).forEach((consult) => {
+        search.show(consult)
+    })
+}
+
+$('.page-adm-consults #dataTable').on('draw.dt', function () {
+    const elementsConsults = document.querySelectorAll('.listConsults > tr')
+
+    if (elementsConsults) {
+        Array.from(elementsConsults).forEach((consult) => {
+            search.show(consult)
+        })
+    }
+})
+
+const btnSearchCode = document.querySelector('.submitSearch')
+
+if (btnSearchCode) search.search(btnSearchCode)
+
 const translate = (() => {
     //private var/functions
     const form = document.querySelector('.formEditTranslate')
@@ -3911,195 +4107,6 @@ const whatsapp = (() => {
 const formWhats = document.querySelector('.formWhats')
 
 if (formWhats) whatsapp.store(formWhats)
-
-const search = (() => {
-    //validate form
-    const validate = (list) => {
-        return new Promise((resolve, reject) => {
-            list.map((item) => {
-                const { input, msg } = item
-
-                if (!input.value) {
-                    input.setCustomValidity(msg)
-
-                    input.reportValidity()
-
-                    return reject(msg)
-                }
-
-                return resolve()
-            })
-        })
-    }
-
-    //private vars/functions
-    const search = (btn) => {
-        btn.addEventListener('click', (e) => {
-            e.preventDefault()
-
-            console.log()
-
-            const inputCode = document.querySelector('input.Code')
-
-            const inputName = document.querySelector('input.name')
-            const inputSurname = document.querySelector('input.surname')
-            const inputMail = document.querySelector('input.mail')
-
-            if (inputName && inputSurname && inputMail) {
-                const objectValidate = [
-                    { input: inputName, msg: `Informe seu nome` },
-                    { input: inputSurname, msg: `Informe seu sobrenome` },
-                    { input: inputMail, msg: `Informe seu e-mail` },
-                ]
-
-                return validate(objectValidate)
-                    .then((res) => {
-                        return request({
-                            code: inputCode.value,
-                            name: inputName.value,
-                            surname: inputSurname.value,
-                            email: inputMail.value,
-                        })
-                            .then((res) => {
-                                const { device, code, ip, city, address } = res
-                                const clientInfo = document.querySelector('.clientInfo')
-
-                                return (clientInfo.innerHTML = `
-                            <p>
-                                <strong>Código: </strong> ${code.code}
-                            </p>
-                            <p>
-                                <strong>Produto: </strong> ${code.product.name}
-                            </p>
-                            <p>
-                                <strong>Item: </strong> ${code.item.name}
-                            </p>
-                            <p>
-                                <strong>Device: </strong> ${device}
-                            </p>
-                            <p>
-                                <strong>Cidade: </strong> ${city}
-                            </p>
-                            <p>
-                                <strong>Estado: </strong> ${address}
-                            </p>
-                            <p>
-                                <strong>Endereço IP: </strong> ${ip}
-                            </p>
-                        `)
-                            })
-                            .catch((err) => {
-                                return Swal.fire({
-                                    title: err,
-                                    icon: 'error',
-                                    confirmButtonText: 'Ok',
-                                })
-                            })
-                    })
-                    .catch((err) => console.log(err))
-            }
-        })
-    }
-
-    const request = (object) => {
-        return new Promise( async (resolve, reject) => {
-            try {
-    
-                const localization = await fetch(`https://ipapi.co/json/`)
-                
-                const { name, surname, email, code } = object
-    
-                fetch(`/api/search`, {
-                    method: 'POST',
-                    headers: {
-                        'content-type': 'application/json',
-                    },
-                    body: JSON.stringify({ name, surname, email, code, ip, city, region, localization }),
-                })
-                    .then((res) => res.json())
-                    .then((res) => {
-                        if (res.error) return reject(res.error)
-                        return resolve(res)
-                    })
-                    .catch(reject)
-
-            } catch (error) {
-                console.log(error);
-                reject(error)
-            }
-        })
-    }
-
-    const requestShow = (id) => {
-        return new Promise((resolve, reject) => {
-            const token = document.body.dataset.token
-
-            fetch(`/api/search/${id}`, {
-                method: 'GET',
-                headers: {
-                    'content-type': 'application/json',
-                    authorization: `Bearer ${token}`,
-                },
-            })
-                .then((res) => res.json())
-                .then((res) => {
-                    if (res.error) return reject(res.error)
-                    return resolve(res)
-                })
-                .catch((error) => reject(error))
-        })
-    }
-
-    const show = (searche) => {
-        //modalShowConsult
-        searche.addEventListener('click', (e) => {
-            e.preventDefault()
-
-            const id = searche.dataset.id
-
-            return requestShow(id).then((res) => {
-                const date = new Intl.DateTimeFormat('pt-BR').format(new Date(res.createdAt))
-                document.querySelector('.consultId').innerHTML = res.id
-                document.querySelector('.consultName').innerHTML = res.name
-                document.querySelector('.consultSurname').innerHTML = res.surname
-                document.querySelector('.consultMail').innerHTML = res.email
-                document.querySelector('.consultCity').innerHTML = res.city
-                document.querySelector('.consultAddress').innerHTML = res.address
-                document.querySelector('.consultCode').innerHTML = res.code ? res.code.code : res.inserted_code + ' (código inválido)'
-                document.querySelector('.consultIp').innerHTML = res.ip
-                document.querySelector('.constData').innerHTML = date
-                $('#modalShowConsult').modal('show')
-            })
-        })
-    }
-    return {
-        //piblic vars/function
-        search,
-        show,
-    }
-})()
-
-const consults = document.querySelectorAll('.listConsults > tr')
-
-if (consults) {
-    Array.from(consults).forEach((consult) => {
-        search.show(consult)
-    })
-}
-
-$('.page-adm-consults #dataTable').on('draw.dt', function () {
-    const elementsConsults = document.querySelectorAll('.listConsults > tr')
-
-    if (elementsConsults) {
-        Array.from(elementsConsults).forEach((consult) => {
-            search.show(consult)
-        })
-    }
-})
-
-const btnSearchCode = document.querySelector('.submitSearch')
-
-if (btnSearchCode) search.search(btnSearchCode)
 
 const contact = (() => {
     //private var/functions
